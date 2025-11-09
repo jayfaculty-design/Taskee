@@ -113,6 +113,46 @@ router.put("/edit-task/:id", verifyToken, async (req, res) => {
 });
 
 // delete a task
-router.delete("/delete-task/:id", verifyToken, (req, res) => {});
+router.delete("/delete-task/:id", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+  const taskId = req.params.id;
+  try {
+    const checkUser = await db.query(`SELECT * FROM users WHERE id = $1`, [
+      userId,
+    ]);
+    const checkTasks = await db.query(
+      `SELECT * FROM tasks WHERE task_id = $1 AND user_id = $2`,
+      [taskId, userId]
+    );
+    const user = checkUser.rows;
+    if (user.length < 1)
+      return res.status(403).json({
+        message: "Unauthorized user",
+      });
+
+    if (checkTasks.rows.length < 1)
+      return res.status(401).json({
+        message: "Task does not exist",
+      });
+
+    const deletdTask = await db.query(
+      `DELETE FROM tasks
+       WHERE task_id = $1 AND user_id = $2
+       RETURNING *
+      `,
+      [taskId, userId]
+    );
+    res.status(200).json({
+      message: "Task deleted successfully",
+      user: req.user.email,
+      deletdTask: deletdTask.rows[0],
+    });
+  } catch (error) {
+    console.error("Error deleting task", error);
+    res.status(500).json({
+      message: "Error deleting task",
+    });
+  }
+});
 
 module.exports = router;
