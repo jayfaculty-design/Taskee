@@ -4,6 +4,7 @@ import {
   Checkbox,
   Container,
   Group,
+  Loader,
   Paper,
   PasswordInput,
   Text,
@@ -11,8 +12,70 @@ import {
   Title,
 } from "@mantine/core";
 import classes from "./AuthenticationTitle.module.css";
+import { AuthContext } from "../../../contexts/AuthContext";
+import { useForm } from "@mantine/form";
+import { useContext, useState } from "react";
+import { useNavigate } from "react-router";
+import { notifications } from "@mantine/notifications";
 
 function Register() {
+  const { register, message } = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const form = useForm({
+    mode: "uncontrolled",
+    initialValues: {
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+
+    validate: {
+      username: (value) =>
+        !value
+          ? "Username cannot be empty"
+          : value.length < 5
+          ? "Username should not be less than 5"
+          : null,
+
+      email: (value) =>
+        /^\S+@\S+$/.test(value)
+          ? null
+          : !value
+          ? "Email cannot be empty"
+          : "Invalid Email",
+
+      password: (value) =>
+        !value
+          ? "Password cannot be empty"
+          : value.length < 5
+          ? "Password should not be less than 5 characters"
+          : null,
+
+      confirmPassword: (value, values) =>
+        value !== values.password ? "Password does not match!" : null,
+    },
+    validateInputOnChange: true,
+  });
+
+  const handleSubmit = async (values: typeof form.values) => {
+    setLoading(true);
+    try {
+      await register(values.username, values.email, values.password);
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1000);
+    } catch (error: any) {
+      console.error("Error signing in", error);
+      notifications.show({
+        message: error.response.data.message,
+        color: "red",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <Container size={420} my={40}>
       <Title ta="center" className={classes.title}>
@@ -23,44 +86,51 @@ function Register() {
         Already have an account? <Anchor href="/login">Sign In</Anchor>
       </Text>
 
-      <Paper withBorder shadow="sm" p={22} mt={30} radius="md">
-        <TextInput
-          label="Username"
-          placeholder="godfred1"
-          required
-          radius={"md"}
-          className="pb-5"
-        />
-        <TextInput
-          label="Email"
-          placeholder="you@mantine.dev"
-          required
-          radius="md"
-        />
-        <PasswordInput
-          label="Password"
-          placeholder="Your password"
-          required
-          mt="md"
-          radius="md"
-        />
-        <PasswordInput
-          label="Confirm Password"
-          placeholder="Confirm Password"
-          required
-          mt="md"
-          radius="md"
-        />
-        <Group justify="space-between" mt="lg">
-          <Checkbox label="Remember me" />
-          <Anchor component="button" size="sm">
-            Forgot password?
-          </Anchor>
-        </Group>
-        <Button fullWidth mt="xl" radius="md">
-          Sign in
-        </Button>
-      </Paper>
+      {message && (
+        <Text ta={"center"} className="text-xs">
+          {message}
+        </Text>
+      )}
+
+      <form onSubmit={form.onSubmit(handleSubmit)}>
+        <Paper withBorder shadow="sm" p={22} mt={30} radius="md">
+          <TextInput
+            label="Username"
+            placeholder="godfred1"
+            radius={"md"}
+            className="pb-5"
+            {...form.getInputProps("username")}
+          />
+          <TextInput
+            label="Email"
+            placeholder="you@mantine.dev"
+            radius="md"
+            {...form.getInputProps("email")}
+          />
+          <PasswordInput
+            label="Password"
+            placeholder="Your password"
+            mt="md"
+            radius="md"
+            {...form.getInputProps("password")}
+          />
+          <PasswordInput
+            label="Confirm Password"
+            placeholder="Confirm Password"
+            mt="md"
+            radius="md"
+            {...form.getInputProps("confirmPassword")}
+          />
+
+          <Button type="submit" fullWidth mt="xl" radius="md">
+            {loading ? (
+              <Loader color="cyan" size="xs" type="dots" />
+            ) : (
+              "Sign Up"
+            )}
+          </Button>
+        </Paper>
+      </form>
     </Container>
   );
 }

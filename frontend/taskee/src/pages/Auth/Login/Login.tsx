@@ -1,6 +1,7 @@
 import {
   Anchor,
   Button,
+  Center,
   Checkbox,
   Container,
   Group,
@@ -44,18 +45,18 @@ function Login() {
   });
 
   const handleSubmit = async (values: typeof form.values) => {
+    setLoading(true);
     try {
-      setLoading(true);
       await login(values.email, values.password);
-      // notifications.show({ message: message, color: "green" });
-      toast.success(message)
       setTimeout(() => {
         navigate("/dashboard");
       }, 1000);
     } catch (error: any) {
       console.error("Error signing in", error);
-      // notifications.show({ message: message, color: "red" });
-      toast.error(message)
+      notifications.show({
+        message: error.response.data.message,
+        color: "red",
+      });
     } finally {
       setLoading(false);
     }
@@ -71,6 +72,12 @@ function Login() {
         Do not have an account yet?{" "}
         <Anchor href="/register">Create account</Anchor>
       </Text>
+
+      {message && (
+        <Text ta={"center"} className="text-xs italic pt-10">
+          {message}
+        </Text>
+      )}
 
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Paper withBorder shadow="sm" p={22} mt={30} radius="md">

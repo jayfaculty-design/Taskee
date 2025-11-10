@@ -9,6 +9,29 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [status, setStatus] = useState(200);
 
+  const register = async (
+    username: string,
+    email: string,
+    password: string
+  ) => {
+    try {
+      const response = await axios.post("http://localhost:5000/auth/register", {
+        username,
+        email,
+        password,
+      });
+      if (response.status !== 200) throw new Error("Network not ok!");
+      if (response.status === 200) {
+        const result = await response.data;
+        localStorage.setItem("token", result.token);
+        setMessage(result.message);
+      }
+    } catch (error: any) {
+      console.error("Error in logging in", error);
+      setMessage(error.response.data.message);
+    }
+  };
+
   const login = async (email: string, password: string) => {
     try {
       const response = await axios.post("http://localhost:5000/auth/login", {
@@ -16,10 +39,12 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
         password,
       });
       if (response.status !== 200) throw Error("Network not Okay");
-      const result = await response.data;
-      setMessage(result.message);
-      setStatus(response.status);
-      localStorage.setItem("token", result.token);
+      if (response.status === 200) {
+        const result = response.data;
+        setMessage(result.message);
+        setStatus(response.status);
+        localStorage.setItem("token", result.token);
+      }
     } catch (error: any) {
       console.error("Error in logging in", error);
       setStatus(error.response.status);
@@ -40,6 +65,7 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
         message,
         status,
         logout,
+        register,
       }}
     >
       {children}
