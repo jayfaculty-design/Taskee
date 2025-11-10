@@ -38,17 +38,16 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
         email,
         password,
       });
-      if (response.status !== 200) throw Error("Network not Okay");
-      if (response.status === 200) {
-        const result = response.data;
-        setMessage(result.message);
-        setStatus(response.status);
-        localStorage.setItem("token", result.token);
-      }
+
+      const result = response.data;
+      setMessage(result.message);
+      setStatus(response.status);
+      localStorage.setItem("token", result.token);
     } catch (error: any) {
       console.error("Error in logging in", error);
-      setStatus(error.response.status);
-      setMessage(error.response.data.message);
+      setStatus(error.response?.status || 500);
+      setMessage(error.response?.data?.message || "Login failed");
+      return false;
     }
   };
 

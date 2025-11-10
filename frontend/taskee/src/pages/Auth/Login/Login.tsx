@@ -54,7 +54,8 @@ function Login() {
     } catch (error: any) {
       console.error("Error signing in", error);
       notifications.show({
-        message: error.response.data.message,
+        message:
+          error.response?.data?.message || "Login failed. Please try again.",
         color: "red",
       });
     } finally {
