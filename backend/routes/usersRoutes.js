@@ -122,4 +122,11 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// logout
+router.post("/logout", (req, res) => {
+  res.status(200).json({
+    message: "Logged Out successfully",
+  });
+});
+
 module.exports = router;
