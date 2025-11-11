@@ -1,12 +1,10 @@
 import React, { createContext, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router";
 
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }: React.PropsWithChildren) => {
   const [message, setMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
   const [status, setStatus] = useState(200);
 
   const register = async (
@@ -20,15 +18,16 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
         email,
         password,
       });
-      if (response.status !== 200) throw new Error("Network not ok!");
-      if (response.status === 200) {
-        const result = await response.data;
-        localStorage.setItem("token", result.token);
-        setMessage(result.message);
-      }
+
+      const result = await response.data;
+      localStorage.setItem("token", result.token);
+      setMessage(result.message);
+      return { success: true, message: result.message };
     } catch (error: any) {
       console.error("Error in logging in", error);
-      setMessage(error.response.data.message);
+      const errorMessage = error.response?.data?.message || "Sign Up Failed";
+      setMessage(errorMessage);
+      return { status: false, message: errorMessage };
     }
   };
 
@@ -40,22 +39,31 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
       });
 
       const result = response.data;
-      setMessage(result.message);
-      setStatus(response.status);
       localStorage.setItem("token", result.token);
+      return { success: true, message: result.message };
     } catch (error: any) {
       console.error("Error in logging in", error);
+      const errorMessage = error.response?.data?.message || "Login Failed";
       setStatus(error.response?.status || 500);
-      setMessage(error.response?.data?.message || "Login failed");
-      return false;
+      setMessage(errorMessage);
+      return { success: false, message: errorMessage };
     }
   };
 
   const logout = async () => {
-    const response = await axios.post("http://localhost:5000/auth/logout");
-    if (response.status !== 200) throw Error("Network Not ok!");
-    localStorage.removeItem("token");
-    setMessage(response.data.message);
+    try {
+      const response = await axios.post("http://localhost:5000/auth/logout");
+      localStorage.removeItem("token");
+      return {
+        success: true,
+        message: response.data?.response?.message || "Logged Out Successfully",
+      };
+    } catch (error: any) {
+      console.error("Error logging out", error);
+      const errorMessage = error.response?.data?.message || "Log Out Failed";
+      setMessage(errorMessage);
+      return { success: false, message: errorMessage };
+    }
   };
   return (
     <AuthContext.Provider

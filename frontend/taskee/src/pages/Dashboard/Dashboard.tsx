@@ -7,21 +7,36 @@ import { toast } from "react-toastify";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { logout, message } = useContext(AuthContext);
+  const { logout } = useContext(AuthContext);
+
+  const handleLogout = async () => {
+    try {
+      const result = await logout();
+      if (result.success) {
+        notifications.show({
+          message: result.message,
+          color: "green",
+        });
+        setTimeout(() => {
+          navigate("/login");
+        }, 1000);
+      } else {
+        notifications.show({
+          message: result.message,
+        });
+      }
+    } catch (error) {
+      console.error("Error occured");
+      notifications.show({
+        message: "Error occured",
+        color: "red",
+      });
+    }
+  };
   return (
     <div>
       <h1>Dashboard</h1>
-      <Button
-        onClick={() => {
-          logout();
-          toast.success(message);
-          setTimeout(() => {
-            navigate("/login");
-          }, 1000);
-        }}
-      >
-        Logout
-      </Button>
+      <Button onClick={handleLogout}>Logout</Button>
     </div>
   );
 };

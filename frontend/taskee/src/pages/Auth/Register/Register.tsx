@@ -62,14 +62,29 @@ function Register() {
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
     try {
-      await register(values.username, values.email, values.password);
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
+      const result = await register(
+        values.username,
+        values.email,
+        values.password
+      );
+      if (result.success) {
+        notifications.show({
+          message: result.message || "Registration successful",
+          color: "green",
+        });
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1000);
+      } else {
+        notifications.show({
+          message: result.message,
+          color: "red",
+        });
+      }
     } catch (error: any) {
-      console.error("Error signing in", error);
+      console.error("Error signing up", error);
       notifications.show({
-        message: error.response.data.message,
+        message: "An unexpected error occurred",
         color: "red",
       });
     } finally {
@@ -85,12 +100,6 @@ function Register() {
       <Text className={classes.subtitle}>
         Already have an account? <Anchor href="/login">Sign In</Anchor>
       </Text>
-
-      {message && (
-        <Text ta={"center"} className="text-xs">
-          {message}
-        </Text>
-      )}
 
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Paper withBorder shadow="sm" p={22} mt={30} radius="md">

@@ -47,15 +47,25 @@ function Login() {
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
     try {
-      await login(values.email, values.password);
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
+      const result = await login(values.email, values.password);
+      if (result.success) {
+        notifications.show({
+          message: result.message,
+          color: "green",
+        });
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1000);
+      } else {
+        notifications.show({
+          message: result.message,
+          color: "red",
+        });
+      }
     } catch (error: any) {
       console.error("Error signing in", error);
       notifications.show({
-        message:
-          error.response?.data?.message || "Login failed. Please try again.",
+        message: "An unexpected error occurred",
         color: "red",
       });
     } finally {
@@ -73,12 +83,6 @@ function Login() {
         Do not have an account yet?{" "}
         <Anchor href="/register">Create account</Anchor>
       </Text>
-
-      {message && (
-        <Text ta={"center"} className="text-xs italic pt-10">
-          {message}
-        </Text>
-      )}
 
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Paper withBorder shadow="sm" p={22} mt={30} radius="md">
