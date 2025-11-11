@@ -3,7 +3,6 @@ import { useContext } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import { notifications } from "@mantine/notifications";
 import { useNavigate } from "react-router";
-import { toast } from "react-toastify";
 
 const Dashboard = () => {
   const navigate = useNavigate();
