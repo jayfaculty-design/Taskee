@@ -3,6 +3,7 @@ const db = require("../config/db");
 const bcrypt = require("bcrypt");
 const pool = require("../config/db");
 const jwt = require("jsonwebtoken");
+const verifyToken = require("../middlewares/verifyToken");
 const router = express.Router();
 require("dotenv").config();
 
@@ -118,6 +119,33 @@ router.post("/login", async (req, res) => {
     console.error("Error in loggin in: ", error);
     res.status(500).json({
       message: "Cannot login, error",
+    });
+  }
+});
+
+// get user details(profile)
+router.get("/me", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const response = await db.query(`SELECT * FROM users WHERE id = $1`, [
+      userId,
+    ]);
+    if (response.rows.length === 0)
+      return res.status(403).json({
+        message: "Unauthorized user",
+      });
+    const user = response.rows[0];
+    res.status(200).json({
+      username: user.username,
+      user_id: user.id,
+      email: user.email,
+      createdAt: user.created_at,
+    });
+  } catch (error) {
+    console.error("Error getting user details", error);
+    res.status(500).json({
+      message: "Error getting user details",
     });
   }
 });
