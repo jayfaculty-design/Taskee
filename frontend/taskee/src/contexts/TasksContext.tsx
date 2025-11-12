@@ -55,7 +55,15 @@ export const TaskProvider = ({ children }: PropsWithChildren) => {
           },
         }
       );
-    } catch (error) {}
+      const data = result.data;
+      return { success: true, message: data.message, task: data.task };
+    } catch (error: any) {
+      console.error("Error occured, try again", error);
+      const errorMessage =
+        error.response?.data?.message || "Error occured, cannot add task";
+
+      return { success: false, message: errorMessage };
+    }
   }
 
   return (
@@ -63,6 +71,7 @@ export const TaskProvider = ({ children }: PropsWithChildren) => {
       value={{
         fetchTasks,
         tasks,
+        addTask,
       }}
     >
       {children}

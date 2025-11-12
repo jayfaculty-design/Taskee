@@ -27,6 +27,7 @@ import { useNavigate } from "react-router";
 import { GrTasks } from "react-icons/gr";
 import axios from "axios";
 import { TasksContext } from "../../contexts/TasksContext";
+import { useForm } from "@mantine/form";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -36,56 +37,29 @@ const Dashboard = () => {
   const [editMode, setEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
 
-  const [todos, setTodos] = useState([
-    {
-      id: 1,
-      title: "Complete project documentation",
-      description: "Write comprehensive docs for the new feature",
-      status: "pending",
-      priority: "high",
-      dueDate: "2025-11-15",
-    },
-    {
-      id: 2,
-      title: "Review pull requests",
-      description: "Review and merge pending PRs from team members",
-      status: "in-progress",
-      priority: "medium",
-      dueDate: "2025-11-13",
-    },
-    {
-      id: 3,
-      title: "Update dependencies",
-      description: "Update all npm packages to latest versions",
-      status: "completed",
+  const form = useForm({
+    mode: "uncontrolled",
+    initialValues: {
+      title: "",
+      description: "",
       priority: "low",
-      dueDate: "2025-11-10",
+      due_date: "",
     },
-    {
-      id: 4,
-      title: "Fix authentication bug",
-      description: "Users unable to login with special characters in password",
-      status: "pending",
-      priority: "high",
-      dueDate: "2025-11-14",
+
+    validate: {
+      title: (value) => (!value ? "Title cannot be empty" : null),
+      description: (value) =>
+        !value
+          ? "Description cannot be empty"
+          : value.length < 5
+          ? "Should not be less than 5 characters"
+          : value.length > 30
+          ? "Should not be more than 30 characters"
+          : null,
+      priority: (value) => (!value ? "Pick a priority" : null),
+      due_date: (value) => (!value ? "Please select due date" : null),
     },
-    {
-      id: 5,
-      title: "Design new landing page",
-      description: "Create mockups for the new marketing site",
-      status: "in-progress",
-      priority: "medium",
-      dueDate: "2025-11-16",
-    },
-    {
-      id: 6,
-      title: "Setup CI/CD pipeline",
-      description: "Configure automated testing and deployment",
-      status: "completed",
-      priority: "high",
-      dueDate: "2025-11-08",
-    },
-  ]);
+  });
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -104,16 +78,22 @@ const Dashboard = () => {
     switch (priority) {
       case "high":
         return "red";
+      case "High":
+        return "red";
       case "medium":
         return "orange";
+      case "Medium":
+        return "orange";
       case "low":
+        return "gray";
+      case "Low":
         return "gray";
       default:
         return "gray";
     }
   };
 
-  const { fetchTasks, tasks } = useContext(TasksContext);
+  const { fetchTasks, tasks, addTask } = useContext(TasksContext);
 
   const tasksCompleted = tasks.filter(
     (completedTask) => completedTask.completed === true
@@ -160,6 +140,25 @@ const Dashboard = () => {
       console.error("Error occured");
       notifications.show({
         message: "Error occured",
+        color: "red",
+      });
+    }
+  };
+
+  const handleAddTask = async (values: typeof form.values) => {
+    const result = await addTask(
+      values.title,
+      values.description,
+      values.priority,
+      values.due_date
+    );
+    if (result.success) {
+      notifications.show({
+        message: result.message,
+      });
+    } else {
+      notifications.show({
+        message: result.message,
         color: "red",
       });
     }
@@ -333,7 +332,8 @@ const Dashboard = () => {
                         {todo.priority}
                       </Badge>
                       <Text size="xs" c="dimmed">
-                        Due: {todo.due_date.slice(0, 10)}
+                        Due:{" "}
+                        {todo.due_date?.slice(0, 10) || new Date().getDate()}
                       </Text>
                     </div>
                   </Card>
@@ -433,34 +433,42 @@ const Dashboard = () => {
         size="lg"
       >
         <Stack gap="md">
-          <TextInput
-            label="Task Title"
-            placeholder="Enter task title"
-            required
-          />
-          <Textarea
-            label="Description"
-            placeholder="Enter task description"
-            minRows={3}
-          />
-          <Select
-            label="Priority"
-            placeholder="Pick Priority"
-            data={["Low", "Medium", "High"]}
-          />
-          <TextInput label="Due Date" type="date" required />
-          <Group grow>
-            <Button
-              variant="light"
-              color="gray"
-              onClick={() => setOpened(false)}
-            >
-              Cancel
-            </Button>
-            <Button color="#f90093" onClick={() => setOpened(false)}>
-              Add Task
-            </Button>
-          </Group>
+          <form onSubmit={form.onSubmit(handleAddTask)} action="">
+            <TextInput
+              label="Task Title"
+              placeholder="Enter task title"
+              {...form.getInputProps("title")}
+            />
+            <Textarea
+              label="Description"
+              placeholder="Enter task description"
+              minRows={3}
+              {...form.getInputProps("description")}
+            />
+            <Select
+              label="Priority"
+              placeholder="Pick Priority"
+              data={["Low", "Medium", "High"]}
+              {...form.getInputProps("priority")}
+            />
+            <TextInput
+              label="Due Date"
+              type="date"
+              {...form.getInputProps("due_date")}
+            />
+            <Group grow>
+              <Button
+                variant="light"
+                color="gray"
+                onClick={() => setOpened(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" color="#f90093">
+                Add Task
+              </Button>
+            </Group>
+          </form>
         </Stack>
       </Modal>
     </div>
