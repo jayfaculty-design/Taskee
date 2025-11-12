@@ -6,7 +6,7 @@ const router = express.Router();
 // adding new task
 router.post("/add-task", verifyToken, async (req, res) => {
   const userId = req.user.id;
-  const { title, description, due_date, completed } = req.body;
+  const { title, description, priority, due_date, completed } = req.body;
   try {
     const user = await db.query(`SELECT * FROM users WHERE id = $1`, [userId]);
     if (user.rows.length < 1)
@@ -15,10 +15,10 @@ router.post("/add-task", verifyToken, async (req, res) => {
       });
 
     const addedTasks = await db.query(
-      `INSERT INTO tasks (title, description, due_date, completed, user_id) 
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO tasks (title, description, due_date, completed, user_id, priority) 
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [title, description, due_date, completed || false, userId]
+      [title, description, due_date, completed || false, userId, priority]
     );
     res.status(200).json({
       message: "Task added Successfuly",

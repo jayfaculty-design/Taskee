@@ -105,9 +105,9 @@ function Login() {
               Forgot password?
             </Anchor>
           </Group>
-          <Button type="submit" fullWidth mt="xl" radius="md">
+          <Button color="#F90093" type="submit" fullWidth mt="xl" radius="md">
             {loading ? (
-              <Loader color="cyan" size="xs" type="dots" />
+              <Loader color="white" size="xs" type="dots" />
             ) : (
               "Sign In"
             )}

@@ -1,1 +1,98 @@
 @import "tailwindcss";
+
+/* Regular */
+@font-face {
+  font-family: "Satoshi";
+  font-style: normal;
+  font-weight: 400;
+  src: local("Satoshi Regular"),
+    url("/fonts/Satoshi-Regular.woff") format("woff");
+}
+
+/* Italic */
+@font-face {
+  font-family: "Satoshi";
+  font-style: italic;
+  font-weight: 400;
+  src: local("Satoshi Italic"), url("/fonts/Satoshi-Italic.woff") format("woff");
+}
+
+/* Light */
+@font-face {
+  font-family: "Satoshi";
+  font-style: normal;
+  font-weight: 300;
+  src: local("Satoshi Light"), url("/fonts/Satoshi-Light.woff") format("woff");
+}
+
+/* Light Italic */
+@font-face {
+  font-family: "Satoshi";
+  font-style: italic;
+  font-weight: 300;
+  src: local("Satoshi Light Italic"),
+    url("/fonts/Satoshi-LightItalic.woff") format("woff");
+}
+
+/* Medium */
+@font-face {
+  font-family: "Satoshi";
+  font-style: normal;
+  font-weight: 500;
+  src: local("Satoshi Medium"), url("/fonts/Satoshi-Medium.woff") format("woff");
+}
+
+/* Medium Italic */
+@font-face {
+  font-family: "Satoshi";
+  font-style: italic;
+  font-weight: 500;
+  src: local("Satoshi Medium Italic"),
+    url("/fonts/Satoshi-MediumItalic.woff") format("woff");
+}
+
+/* Bold */
+@font-face {
+  font-family: "Satoshi";
+  font-style: normal;
+  font-weight: 700;
+  src: local("Satoshi Bold"), url("/fonts/Satoshi-Bold.woff") format("woff");
+}
+
+/* Bold Italic */
+@font-face {
+  font-family: "Satoshi";
+  font-style: italic;
+  font-weight: 700;
+  src: local("Satoshi Bold Italic"),
+    url("/fonts/Satoshi-BoldItalic.woff") format("woff");
+}
+
+/* Black */
+@font-face {
+  font-family: "Satoshi";
+  font-style: normal;
+  font-weight: 900;
+  src: local("Satoshi Black"), url("/fonts/Satoshi-Black.woff") format("woff");
+}
+
+/* Black Italic */
+@font-face {
+  font-family: "Satoshi";
+  font-style: italic;
+  font-weight: 900;
+  src: local("Satoshi Black Italic"),
+    url("/fonts/Satoshi-BlackItalic.woff") format("woff");
+}
+
+@theme {
+  --color-primary-color: #f90093;
+  --font-stack-sans: "Stack Sans Notch", sans-serif;
+}
+
+body {
+  font-family: "Satoshi", sans-serif;
+}
+* {
+  font-family: "Satoshi", sans-serif;
+}

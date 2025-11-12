@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import "@mantine/notifications/styles.css";
 import { Notifications } from "@mantine/notifications";
 import { AuthProvider } from "./contexts/AuthContext";
+import { TaskProvider } from "./contexts/TasksContext";
 
 function App() {
   return (
@@ -16,16 +17,18 @@ function App() {
       <MantineProvider>
         <Notifications />
         <AuthProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" index element={<Index />} />
-              <Route element={<ProtectedRoute />}>
-                <Route path="/dashboard" element={<Dashboard />} />
-              </Route>
-              <Route path="/login" index element={<Login />} />
-              <Route path="/register" index element={<Register />} />
-            </Routes>
-          </BrowserRouter>
+          <TaskProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" index element={<Index />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                </Route>
+                <Route path="/login" index element={<Login />} />
+                <Route path="/register" index element={<Register />} />
+              </Routes>
+            </BrowserRouter>
+          </TaskProvider>
         </AuthProvider>
       </MantineProvider>
     </>
