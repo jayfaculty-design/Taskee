@@ -30,6 +30,34 @@ export const TaskProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
+  // Add Task
+  async function addTask(
+    title: string,
+    description: string,
+    priority: string,
+    due_date: string,
+    completed: string
+  ) {
+    try {
+      const token = localStorage.getItem("token");
+      const result = await axios.post(
+        "http://localhost:5000/tasks/add-task",
+        {
+          title,
+          description,
+          priority,
+          due_date,
+          completed,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {}
+  }
+
   return (
     <TasksContext.Provider
       value={{

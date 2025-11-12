@@ -14,6 +14,7 @@ import {
   Stack,
   Progress,
   Menu,
+  Select,
 } from "@mantine/core";
 import { GiPlagueDoctorProfile } from "react-icons/gi";
 import { BsListTask, BsThreeDotsVertical } from "react-icons/bs";
@@ -377,7 +378,7 @@ const Dashboard = () => {
                           Tasks Completed
                         </Text>
                         <Text size="xl" fw={700} c="green">
-                          {/* {user.tasksCompleted} */}0
+                          {tasksCompleted.length}
                         </Text>
                       </Card>
                       <Card withBorder padding="md">
@@ -441,6 +442,11 @@ const Dashboard = () => {
             label="Description"
             placeholder="Enter task description"
             minRows={3}
+          />
+          <Select
+            label="Priority"
+            placeholder="Pick Priority"
+            data={["Low", "Medium", "High"]}
           />
           <TextInput label="Due Date" type="date" required />
           <Group grow>
