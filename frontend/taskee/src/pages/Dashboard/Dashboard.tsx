@@ -47,14 +47,17 @@ const Dashboard = () => {
     },
 
     validate: {
-      title: (value) => (!value ? "Title cannot be empty" : null),
+      title: (value) =>
+        !value
+          ? "Title cannot be empty"
+          : value.length > 30
+          ? "Should not be more than 30 characters"
+          : null,
       description: (value) =>
         !value
           ? "Description cannot be empty"
           : value.length < 5
           ? "Should not be less than 5 characters"
-          : value.length > 30
-          ? "Should not be more than 30 characters"
           : null,
       priority: (value) => (!value ? "Pick a priority" : null),
       due_date: (value) => (!value ? "Please select due date" : null),
@@ -464,7 +467,11 @@ const Dashboard = () => {
               >
                 Cancel
               </Button>
-              <Button type="submit" color="#f90093">
+              <Button
+                onClick={() => fetchTasks()}
+                type="submit"
+                color="#f90093"
+              >
                 Add Task
               </Button>
             </Group>

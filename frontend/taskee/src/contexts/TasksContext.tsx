@@ -66,6 +66,11 @@ export const TaskProvider = ({ children }: PropsWithChildren) => {
     }
   }
 
+  // deleteTodo
+  async function deleteTask(){
+    
+  }
+
   return (
     <TasksContext.Provider
       value={{
