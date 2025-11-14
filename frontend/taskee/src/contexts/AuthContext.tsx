@@ -6,6 +6,7 @@ export const AuthContext = createContext(null);
 export const AuthProvider = ({ children }: React.PropsWithChildren) => {
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState(200);
+  
 
   const register = async (
     username: string,

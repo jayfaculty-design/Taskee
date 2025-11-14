@@ -46,6 +46,7 @@ const Dashboard = () => {
     deleteTask,
     editTask,
   } = useContext(TasksContext);
+  const [loading, setLoading]= useState(false)
 
   const form = useForm({
     mode: "uncontrolled",
@@ -160,6 +161,7 @@ const Dashboard = () => {
   }, []);
 
   const handleLogout = async () => {
+    setLoading(true)
     try {
       const result = await logout();
       if (result.success) {
@@ -182,6 +184,8 @@ const Dashboard = () => {
         color: "red",
       });
     }
+    finally {
+    setLoading(false)
   };
 
   const handleMarkComplete = async (id) => {
@@ -286,6 +290,7 @@ const Dashboard = () => {
               variant="light"
               color="#f90093"
               onClick={handleLogout}
+              loading={loading}
             >
               Logout
             </Button>
@@ -413,6 +418,7 @@ const Dashboard = () => {
                                   Mark Complete
                                 </Menu.Item>
                               )}
+
                               <Menu.Item
                                 leftSection={<FiTrash2 size={14} />}
                                 color="red"
@@ -448,9 +454,7 @@ const Dashboard = () => {
                             {todo?.priority}
                           </Badge>
                           <Text size="xs" c="dimmed">
-                            Due:{" "}
-                            {todo?.due_date?.slice(0, 10) ||
-                              new Date().getDate()}
+                            Due: {todo.due_date.split("T")[0]}
                           </Text>
                         </div>
                       </Card>
