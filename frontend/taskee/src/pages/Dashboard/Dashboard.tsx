@@ -36,8 +36,45 @@ const Dashboard = () => {
   const [opened, setOpened] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
+  const [editingTask, setEditingTask] = useState(null);
+  const {
+    fetchTasks,
+    tasks,
+    addTask,
+    loading,
+    marksTaskComplete,
+    deleteTask,
+    editTask,
+  } = useContext(TasksContext);
 
   const form = useForm({
+    mode: "uncontrolled",
+    initialValues: {
+      title: "",
+      description: "",
+      priority: "low",
+      due_date: "",
+    },
+
+    validate: {
+      title: (value) =>
+        !value
+          ? "Title cannot be empty"
+          : value.length > 30
+          ? "Should not be more than 30 characters"
+          : null,
+      description: (value) =>
+        !value
+          ? "Description cannot be empty"
+          : value.length < 5
+          ? "Should not be less than 5 characters"
+          : null,
+      priority: (value) => (!value ? "Pick a priority" : null),
+      due_date: (value) => (!value ? "Please select due date" : null),
+    },
+  });
+
+  const form_2 = useForm({
     mode: "uncontrolled",
     initialValues: {
       title: "",
@@ -96,15 +133,14 @@ const Dashboard = () => {
     }
   };
 
-  const { fetchTasks, tasks, addTask } = useContext(TasksContext);
-
   const tasksCompleted = tasks.filter(
-    (completedTask) => completedTask.completed === true
+    (completedTask) => completedTask?.status === "completed"
   );
 
-  const completionPercentage = Math.round(
-    (tasksCompleted.length / tasks.length) * 100
-  );
+  const completionPercentage =
+    tasks.length > 0
+      ? Math.round((tasksCompleted.length / tasks.length) * 100)
+      : 0;
 
   // fetch profile
   const fetchProfile = async () => {
@@ -148,6 +184,19 @@ const Dashboard = () => {
     }
   };
 
+  const handleMarkComplete = async (id) => {
+    const result = await marksTaskComplete(id);
+    if (result.success) {
+      notifications.show({
+        message: result.message,
+      });
+    } else {
+      notifications.show({
+        message: result.message,
+      });
+    }
+  };
+
   const handleAddTask = async (values: typeof form.values) => {
     const result = await addTask(
       values.title,
@@ -159,12 +208,58 @@ const Dashboard = () => {
       notifications.show({
         message: result.message,
       });
+      setOpened(false);
     } else {
       notifications.show({
         message: result.message,
         color: "red",
       });
     }
+  };
+
+  const handleDeleteTask = async (id: number) => {
+    const result = await deleteTask(id);
+    if (result.success) {
+      notifications.show({
+        message: result.message,
+      });
+    } else {
+      notifications.show({
+        message: result.message,
+        color: "red",
+      });
+    }
+  };
+  const handleEditTask = async (values: typeof form_2.values) => {
+    const updates = {
+      title: values.title,
+      description: values.description,
+      priority: values.priority,
+      due_date: values.due_date,
+    };
+    const result = await editTask(editingTask.id, updates);
+    if (result.success) {
+      notifications.show({
+        message: result.message,
+      });
+      setEditMode(false);
+    } else {
+      notifications.show({
+        message: result.message,
+        color: "red",
+      });
+    }
+  };
+
+  const openEditModal = (task) => {
+    setEditingTask(task);
+    form_2.setValues({
+      title: task.title,
+      description: task.description,
+      priority: task.priority,
+      due_date: task.due_date.split("T")[0],
+    });
+    setEditMode(true);
   };
   return (
     <div className="min-h-screen">
@@ -223,7 +318,7 @@ const Dashboard = () => {
                 </Text>
                 <Text size="sm" c="dimmed" mt={4}>
                   You have{" "}
-                  {tasks.filter((t) => t.status !== "completed").length} tasks
+                  {tasks.filter((t) => t?.status !== "completed").length} tasks
                   pending
                 </Text>
               </div>
@@ -276,72 +371,97 @@ const Dashboard = () => {
 
               {/* Tasks Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {tasks.map((todo) => (
-                  <Card
-                    key={todo.id}
-                    shadow="sm"
-                    padding="lg"
-                    radius="md"
-                    withBorder
-                    className="hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex justify-between items-start mb-3">
-                      <Badge
-                        color={getStatusColor(todo.status)}
-                        variant="light"
-                        size="sm"
+                {tasks.length > 0 &&
+                  tasks.map((todo) => {
+                    return (
+                      <Card
+                        key={todo?.id}
+                        shadow="sm"
+                        padding="lg"
+                        radius="md"
+                        withBorder
+                        className="hover:shadow-md transition-shadow"
                       >
-                        {todo.status}
-                      </Badge>
-                      <Menu shadow="md" width={200}>
-                        <Menu.Target>
-                          <ActionIcon variant="subtle" color="gray">
-                            <BsThreeDotsVertical size={16} />
-                          </ActionIcon>
-                        </Menu.Target>
-                        <Menu.Dropdown>
-                          <Menu.Item leftSection={<FiEdit size={14} />}>
-                            Edit
-                          </Menu.Item>
-                          <Menu.Item
-                            leftSection={<FiCheck size={14} />}
-                            color="green"
+                        <div className="flex justify-between items-start mb-3">
+                          <Badge
+                            color={getStatusColor(todo?.status)}
+                            variant="light"
+                            size="sm"
                           >
-                            Mark Complete
-                          </Menu.Item>
-                          <Menu.Item
-                            leftSection={<FiTrash2 size={14} />}
-                            color="red"
+                            {todo?.status}
+                          </Badge>
+
+                          <Menu shadow="md" width={200}>
+                            <Menu.Target>
+                              <ActionIcon variant="subtle" color="gray">
+                                <BsThreeDotsVertical size={16} />
+                              </ActionIcon>
+                            </Menu.Target>
+                            <Menu.Dropdown>
+                              <Menu.Item
+                                onClick={() => openEditModal(todo)}
+                                leftSection={<FiEdit size={14} />}
+                              >
+                                Edit
+                              </Menu.Item>
+                              {todo.status !== "completed" && (
+                                <Menu.Item
+                                  leftSection={<FiCheck size={14} />}
+                                  color="green"
+                                  onClick={() => handleMarkComplete(todo.id)}
+                                >
+                                  Mark Complete
+                                </Menu.Item>
+                              )}
+                              <Menu.Item
+                                leftSection={<FiTrash2 size={14} />}
+                                color="red"
+                                onClick={() => handleDeleteTask(todo.id)}
+                              >
+                                Delete
+                              </Menu.Item>
+                            </Menu.Dropdown>
+                          </Menu>
+                        </div>
+
+                        <Text
+                          fw={600}
+                          size="lg"
+                          className="mb-2 text-amber-900"
+                        >
+                          {todo?.title}
+                        </Text>
+                        <Text
+                          size="sm"
+                          c="dimmed"
+                          className="mb-4 line-clamp-2"
+                        >
+                          {todo?.description}
+                        </Text>
+
+                        <div className="flex justify-between items-center mt-auto pt-3 border-t border-gray-200">
+                          <Badge
+                            color={getPriorityColor(todo?.priority)}
+                            variant="outline"
+                            size="xs"
                           >
-                            Delete
-                          </Menu.Item>
-                        </Menu.Dropdown>
-                      </Menu>
-                    </div>
-
-                    <Text fw={600} size="lg" className="mb-2 text-amber-900">
-                      {todo.title}
-                    </Text>
-                    <Text size="sm" c="dimmed" className="mb-4 line-clamp-2">
-                      {todo.description}
-                    </Text>
-
-                    <div className="flex justify-between items-center mt-auto pt-3 border-t border-gray-200">
-                      <Badge
-                        color={getPriorityColor(todo.priority)}
-                        variant="outline"
-                        size="xs"
-                      >
-                        {todo.priority}
-                      </Badge>
-                      <Text size="xs" c="dimmed">
-                        Due:{" "}
-                        {todo.due_date?.slice(0, 10) || new Date().getDate()}
-                      </Text>
-                    </div>
-                  </Card>
-                ))}
+                            {todo?.priority}
+                          </Badge>
+                          <Text size="xs" c="dimmed">
+                            Due:{" "}
+                            {todo?.due_date?.slice(0, 10) ||
+                              new Date().getDate()}
+                          </Text>
+                        </div>
+                      </Card>
+                    );
+                  })}
               </div>
+              {tasks.length === 0 && (
+                <div className="h-[30vh] flex items-center justify-center  w-full">
+                  <p>No task found</p>
+                </div>
+              )}
             </div>
           </Tabs.Panel>
 
@@ -428,6 +548,54 @@ const Dashboard = () => {
         </Tabs>
       </div>
 
+      {/* Edit Task Modal */}
+      <Modal
+        opened={editMode}
+        onClose={() => setEditMode(false)}
+        title={<Text fw={600}>Edit Task</Text>}
+        size="lg"
+      >
+        <Stack gap={"md"}>
+          <form action="" onSubmit={form_2.onSubmit(handleEditTask)}>
+            <TextInput
+              label="Task Title"
+              placeholder="Enter task title"
+              {...form_2.getInputProps("title")}
+            />
+            <Textarea
+              label="Description"
+              placeholder="Enter task description"
+              minRows={3}
+              {...form_2.getInputProps("description")}
+            />
+            <Select
+              label="Priority"
+              placeholder="Pick Priority"
+              data={["Low", "Medium", "High"]}
+              {...form_2.getInputProps("priority")}
+            />
+            <TextInput
+              label="Due Date"
+              type="date"
+              pb={20}
+              {...form_2.getInputProps("due_date")}
+            />
+            <Group grow>
+              <Button
+                variant="light"
+                color="gray"
+                onClick={() => setEditMode(false)}
+              >
+                Cancel
+              </Button>
+              <Button loading={loading} type="submit" color="#f90093">
+                Upadate Task
+              </Button>
+            </Group>
+          </form>
+        </Stack>
+      </Modal>
+
       {/* Add Task Modal */}
       <Modal
         opened={opened}
@@ -457,6 +625,7 @@ const Dashboard = () => {
             <TextInput
               label="Due Date"
               type="date"
+              pb={20}
               {...form.getInputProps("due_date")}
             />
             <Group grow>
@@ -467,11 +636,7 @@ const Dashboard = () => {
               >
                 Cancel
               </Button>
-              <Button
-                onClick={() => fetchTasks()}
-                type="submit"
-                color="#f90093"
-              >
+              <Button loading={loading} type="submit" color="#f90093">
                 Add Task
               </Button>
             </Group>

@@ -21,7 +21,7 @@ import { useNavigate } from "react-router";
 import { notifications } from "@mantine/notifications";
 
 function Login() {
-  const { login, message, status } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const form = useForm({

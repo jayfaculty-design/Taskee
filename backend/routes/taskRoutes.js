@@ -6,7 +6,7 @@ const router = express.Router();
 // adding new task
 router.post("/add-task", verifyToken, async (req, res) => {
   const userId = req.user.id;
-  const { title, description, priority, due_date, completed } = req.body;
+  const { title, description, priority, due_date } = req.body;
   try {
     const user = await db.query(`SELECT * FROM users WHERE id = $1`, [userId]);
     if (user.rows.length < 1)
@@ -15,10 +15,10 @@ router.post("/add-task", verifyToken, async (req, res) => {
       });
 
     const addedTasks = await db.query(
-      `INSERT INTO tasks (title, description, due_date, completed, user_id, priority) 
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO tasks (title, description, due_date, user_id, priority) 
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [title, description, due_date, completed || false, userId, priority]
+      [title, description, due_date, userId, priority]
     );
     res.status(200).json({
       message: "Task added Successfuly",
@@ -66,16 +66,17 @@ router.get("/all-tasks", verifyToken, async (req, res) => {
 router.put("/edit-task/:id", verifyToken, async (req, res) => {
   const userId = req.user.id;
   const taskId = req.params.id;
-  const { title, description, completed } = req.body;
+  const { title, description, priority, due_date } = req.body;
 
   try {
     const checkUser = await db.query("SELECT * FROM users WHERE id = $1", [
       userId,
     ]);
     const checkTasks = await db.query(
-      `SELECT * FROM tasks WHERE task_id = $1 AND user_id = $2`,
+      `SELECT * FROM tasks WHERE id = $1 AND user_id = $2`,
       [taskId, userId]
     );
+
     if (checkUser.rows.length < 1)
       return res.status(401).json({
         message: "Unauthorized user",
@@ -93,12 +94,14 @@ router.put("/edit-task/:id", verifyToken, async (req, res) => {
       SET 
       title = COALESCE($1, title),
       description = COALESCE($2, description),
-      completed = COALESCE($3, completed)
-      WHERE user_id = $4 AND task_id = $5
+      priority = COALESCE($3, priority),
+      due_date = COALESCE($4, due_date)
+      WHERE user_id = $5 AND id = $6
       RETURNING *
       `,
-      [title, description, completed, userId, taskId]
+      [title, description, priority, due_date, userId, taskId]
     );
+
     res.status(200).json({
       message: "Task updated Successfully",
       user: req.user.email,
@@ -112,6 +115,40 @@ router.put("/edit-task/:id", verifyToken, async (req, res) => {
   }
 });
 
+// mark complete
+router.put("/mark-complete/:id", verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const id = req.params.id;
+    const completed = "completed";
+    const response = await db.query(`SELECT * FROM users WHERE id = $1`, [
+      userId,
+    ]);
+    if (response.rows.length === 0)
+      return res.status(500).json({
+        message: "Unauthorized user",
+      });
+
+    const result = await db.query(
+      `
+      UPDATE tasks
+      SET status = $1
+      WHERE user_id = $2 AND id = $3
+      `,
+      [completed, userId, id]
+    );
+    res.status(200).json({
+      message: "Marked completed",
+      task: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Error in marking task complete", error);
+    res.status(503).json({
+      message: "Something went wrong, error",
+    });
+  }
+});
+
 // delete a task
 router.delete("/delete-task/:id", verifyToken, async (req, res) => {
   const userId = req.user.id;
@@ -121,7 +158,7 @@ router.delete("/delete-task/:id", verifyToken, async (req, res) => {
       userId,
     ]);
     const checkTasks = await db.query(
-      `SELECT * FROM tasks WHERE task_id = $1 AND user_id = $2`,
+      `SELECT * FROM tasks WHERE id = $1 AND user_id = $2`,
       [taskId, userId]
     );
     const user = checkUser.rows;
@@ -137,7 +174,7 @@ router.delete("/delete-task/:id", verifyToken, async (req, res) => {
 
     const deletdTask = await db.query(
       `DELETE FROM tasks
-       WHERE task_id = $1 AND user_id = $2
+       WHERE id = $1 AND user_id = $2
        RETURNING *
       `,
       [taskId, userId]

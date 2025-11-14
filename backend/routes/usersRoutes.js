@@ -1,7 +1,6 @@
 const express = require("express");
 const db = require("../config/db");
 const bcrypt = require("bcrypt");
-const pool = require("../config/db");
 const jwt = require("jsonwebtoken");
 const verifyToken = require("../middlewares/verifyToken");
 const router = express.Router();
@@ -11,21 +10,20 @@ require("dotenv").config();
 router.post("/register", async (req, res) => {
   const { username, email, password } = req.body;
   try {
-    const checkEmails = await pool.query(
-      `SELECT * FROM users WHERE email = $1`,
-      [email]
-    );
-    const existingUsername = await pool.query(
+    const checkEmails = await db.query(`SELECT * FROM users WHERE email = $1`, [
+      email,
+    ]);
+    const existingUsername = await db.query(
       `SELECT * FROM users WHERE username = $1`,
       [username]
     );
 
-    if (checkEmails.rows.length > 1) {
+    if (checkEmails.rows.length > 0) {
       return res.status(403).json({
         message: "Email already exists",
       });
     }
-    if (existingUsername.rows.length > 1) {
+    if (existingUsername.rows.length > 0) {
       return res.status(403).json({
         message: "Username already taken",
       });
@@ -35,16 +33,17 @@ router.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const registerdUser = await db.query(
-      `
-        INSERT INTO users (username, email, password) VALUES ($1, $2, $3)`,
+      `INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *`,
       [username, email, hashedPassword]
     );
 
+    const user = registerdUser.rows[0];
     // generate a token
     const token = jwt.sign(
       {
-        username: username,
-        email: email,
+        id: user.id,
+        username: user.username,
+        email: user.email,
       },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
@@ -53,6 +52,7 @@ router.post("/register", async (req, res) => {
     res.status(200).json({
       message: "User registered Sucessfully",
       username: registerdUser.rows[0]?.username,
+      id: registerdUser.rows[0]?.id,
       token: token,
     });
   } catch (error) {

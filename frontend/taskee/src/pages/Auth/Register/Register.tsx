@@ -19,7 +19,7 @@ import { useNavigate } from "react-router";
 import { notifications } from "@mantine/notifications";
 
 function Register() {
-  const { register, message } = useContext(AuthContext);
+  const { register } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const form = useForm({
@@ -131,9 +131,9 @@ function Register() {
             {...form.getInputProps("confirmPassword")}
           />
 
-          <Button type="submit" fullWidth mt="xl" radius="md">
+          <Button color="#F90093" type="submit" fullWidth mt="xl" radius="md">
             {loading ? (
-              <Loader color="cyan" size="xs" type="dots" />
+              <Loader color="white" size="xs" type="dots" />
             ) : (
               "Sign Up"
             )}
