@@ -45,6 +45,8 @@
   },
   "overrides": {
     "vite": "npm:rolldown-vite@7.1.14"
+  },
+  "resolutions": {
+    "@rollup/rollup-win32-x64-msvc": "npm:@rollup/rollup-linux-x64-gnu"
   }
-  
 }
