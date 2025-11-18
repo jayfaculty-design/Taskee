@@ -28,11 +28,14 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
     password: string
   ) => {
     try {
-      const response = await axios.post("http://localhost:5000/auth/register", {
-        username,
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "https://taskee-k4pn.onrender.com/auth/register",
+        {
+          username,
+          email,
+          password,
+        }
+      );
 
       const result = await response.data;
       localStorage.setItem("token", result.token);
@@ -48,10 +51,13 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post("http://localhost:5000/auth/login", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "https://taskee-k4pn.onrender.com/auth/login",
+        {
+          email,
+          password,
+        }
+      );
 
       const result = response.data;
       localStorage.setItem("token", result.token);
@@ -67,7 +73,9 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
 
   const logout = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/auth/logout");
+      const response = await axios.post(
+        "https://taskee-k4pn.onrender.com/auth/logout"
+      );
       localStorage.removeItem("token");
       return {
         success: true,

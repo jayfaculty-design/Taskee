@@ -48,7 +48,7 @@ export const TaskProvider = ({ children }: PropsWithChildren) => {
     const token = localStorage.getItem("token");
     try {
       const response = await axios.get(
-        "http://localhost:5000/tasks/all-tasks",
+        "https://taskee-k4pn.onrender.com/tasks/all-tasks",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -78,7 +78,7 @@ export const TaskProvider = ({ children }: PropsWithChildren) => {
     try {
       const token = localStorage.getItem("token");
       const result = await axios.post(
-        "http://localhost:5000/tasks/add-task",
+        "https://taskee-k4pn.onrender.com/tasks/add-task",
         {
           title,
           description,
@@ -112,7 +112,7 @@ export const TaskProvider = ({ children }: PropsWithChildren) => {
     const token = localStorage.getItem("token");
     try {
       const response = await axios.put(
-        `http://localhost:5000/tasks/mark-complete/${id}`,
+        `https://taskee-k4pn.onrender.com/tasks/mark-complete/${id}`,
         {},
         {
           headers: {
@@ -146,7 +146,7 @@ export const TaskProvider = ({ children }: PropsWithChildren) => {
     const token = localStorage.getItem("token");
     try {
       const response = await axios.delete(
-        `http://localhost:5000/tasks/delete-task/${id}`,
+        `https://taskee-k4pn.onrender.com/tasks/delete-task/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -171,7 +171,7 @@ export const TaskProvider = ({ children }: PropsWithChildren) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.put(
-        `http://localhost:5000/tasks/edit-task/${taskId}`,
+        `https://taskee-k4pn.onrender.com/tasks/edit-task/${taskId}`,
         updates,
         {
           headers: {

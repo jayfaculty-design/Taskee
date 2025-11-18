@@ -169,11 +169,14 @@ const Dashboard = () => {
   // fetch profile
   const fetchProfile = async () => {
     const token = localStorage.getItem("token");
-    const response = await axios.get("http://localhost:5000/auth/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get(
+      "https://taskee-k4pn.onrender.com/auth/me",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     const data = response.data;
     console.log(data);
     setUser(data);
