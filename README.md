@@ -4,8 +4,8 @@ A modern, full-stack todo web application with authentication built using React,
 
 ## Live Demo
 
-- **Frontend**: [https://your-frontend-url.vercel.app](https://your-frontend-url.vercel.app)
-- **Backend API**: [https://your-backend-url.onrender.com](https://your-backend-url.onrender.com)
+- **Frontend**: [https://taskee-manager.vercel.app/dashboard](https://taskee-manager.vercel.app/dashboard)
+- **Backend API**: [https://taskee-k4pn.onrender.com/](https://taskee-k4pn.onrender.com/)
 
 ## Features
 
@@ -134,26 +134,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ##  Author
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your LinkedIn](https://linkedin.com/in/yourprofile)
-- Email: your.email@example.com
+- GitHub: [@jayfaculty-design](https://github.com/jayfaculty-design)
+- LinkedIn: [LinkedIn](https://www.linkedin.com/in/godfred-entsie-952a69223/)
+- Email: izfaculty12@gmail.com
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - [Mantine UI](https://mantine.dev/) for the amazing component library
 - [React](https://react.dev/) team for the excellent framework
 - [Express.js](https://expressjs.com/) for the robust backend framework
 - [PostgreSQL](https://www.postgresql.org/) for the reliable database
 
-## 📸 Screenshots
-
-### Login Page
-![Login](https://via.placeholder.com/800x500/667EEA/FFFFFF?text=Login+Page)
-
-### Task Dashboard
-![Dashboard](https://via.placeholder.com/800x500/48BB78/FFFFFF?text=Task+Dashboard)
-
-### Add Task
-![Add Task](https://via.placeholder.com/800x500/F6AD55/FFFFFF?text=Add+Task+Modal)
 
 ---
