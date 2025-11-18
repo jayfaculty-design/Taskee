@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "node -e \"try { require('rollup') } catch (e) { process.exit(1) }\""
   },
   "dependencies": {
     "@mantine/core": "^8.3.7",
