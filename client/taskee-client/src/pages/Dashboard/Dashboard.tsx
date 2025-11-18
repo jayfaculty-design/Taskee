@@ -354,7 +354,13 @@ const Dashboard = () => {
               {/* Welcome Section */}
               <div>
                 <Text size="2xl" fw={700} className="text-amber-900">
-                  Good morning, {user?.username}! 👋
+                  Good{" "}
+                  {new Date().getHours() < 12
+                    ? "morning"
+                    : new Date().getHours() < 18
+                    ? "afternoon"
+                    : "evening"}
+                  , {user?.username}! 👋
                 </Text>
                 <Text size="sm" c="dimmed" mt={4}>
                   You have{" "}
