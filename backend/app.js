@@ -7,16 +7,16 @@ const tasksRoutes = require("./routes/taskRoutes");
 const app = express();
 const PORT = 5000;
 
+const corOptions = {
+  origin: ["https://taskee-manager.vercel.app/", "http://localhost:5173"],
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
 // middlewares
-app.use(
-  cors({
-    origin: [
-      "https://taskee-manager.vercel.app/dashboard",
-      "http://localhost:5173",
-    ],
-    credentials: true,
-  })
-);
+app.use(cors(corOptions));
 app.use(express.json());
 
 //routes
