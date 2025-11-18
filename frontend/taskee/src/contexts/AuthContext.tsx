@@ -1,12 +1,26 @@
 import React, { createContext, useState } from "react";
-import axios from "axios";
 
-export const AuthContext = createContext(null);
+interface AuthContextType {
+  message: string;
+  status: number;
+  login: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; message: string }>;
+  logout: () => Promise<{ success: boolean; message: string }>;
+  register: (
+    username: string,
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; message: string }>;
+}
+
+export const AuthContext = createContext<AuthContextType | null>(null);
+import axios from "axios";
 
 export const AuthProvider = ({ children }: React.PropsWithChildren) => {
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState(200);
-  
 
   const register = async (
     username: string,
@@ -28,7 +42,7 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
       console.error("Error in logging in", error);
       const errorMessage = error.response?.data?.message || "Sign Up Failed";
       setMessage(errorMessage);
-      return { status: false, message: errorMessage };
+      return { success: false, message: errorMessage };
     }
   };
 

@@ -1,10 +1,46 @@
 import axios from "axios";
 import { createContext, useState, type PropsWithChildren } from "react";
 
-export const TasksContext = createContext(null);
+interface TasksContextType {
+  fetchTasks: () => Promise<{ success: boolean; message: string }>;
+  tasks: {
+    id: number;
+    title: string;
+    description: string;
+    priority: string;
+    due_date: string;
+    status: string;
+  }[];
+  loading: boolean;
+  addTask: (
+    title: string,
+    description: string,
+    priority: string,
+    due_date: string
+  ) => Promise<{ success: boolean; message: string; task?: any }>;
+  marksTaskComplete: (
+    id: number
+  ) => Promise<{ success: boolean; message: string }>;
+  deleteTask: (id: number) => Promise<{ success: boolean; message: string }>;
+  editTask: (
+    taskId: number,
+    updates: any
+  ) => Promise<{ success: boolean; message: string }>;
+}
+
+export const TasksContext = createContext<TasksContextType | null>(null);
 
 export const TaskProvider = ({ children }: PropsWithChildren) => {
-  const [tasks, setTodos] = useState([]);
+  const [tasks, setTodos] = useState<
+    {
+      id: number;
+      title: string;
+      description: string;
+      priority: string;
+      due_date: string;
+      status: string;
+    }[]
+  >([]);
   const [loading, setLoading] = useState(false);
 
   // fetch tasks
@@ -36,9 +72,9 @@ export const TaskProvider = ({ children }: PropsWithChildren) => {
     title: string,
     description: string,
     priority: string,
-    due_date: string,
-    completed: string
+    due_date: string
   ) {
+    setLoading(true);
     try {
       const token = localStorage.getItem("token");
       const result = await axios.post(
@@ -48,7 +84,6 @@ export const TaskProvider = ({ children }: PropsWithChildren) => {
           description,
           priority,
           due_date,
-          completed,
         },
         {
           headers: {
@@ -57,9 +92,6 @@ export const TaskProvider = ({ children }: PropsWithChildren) => {
         }
       );
       const data = result.data;
-
-      console.log("Returned task:", data.task);
-      console.log("Current tasks:", tasks);
 
       setTodos((prevTasks) => [...prevTasks, data.task]);
       return { success: true, message: data.message, task: data.task };

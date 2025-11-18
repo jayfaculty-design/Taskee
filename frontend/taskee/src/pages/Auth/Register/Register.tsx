@@ -1,9 +1,7 @@
 import {
   Anchor,
   Button,
-  Checkbox,
   Container,
-  Group,
   Loader,
   Paper,
   PasswordInput,
@@ -19,7 +17,11 @@ import { useNavigate } from "react-router";
 import { notifications } from "@mantine/notifications";
 
 function Register() {
-  const { register } = useContext(AuthContext);
+  const authContext = useContext(AuthContext);
+  if (!authContext) {
+    throw new Error("No context provided");
+  }
+  const { register } = authContext;
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const form = useForm({

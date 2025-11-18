@@ -31,12 +31,36 @@ import { useForm } from "@mantine/form";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { logout } = useContext(AuthContext);
-  const [user, setUser] = useState(null);
+  const authContext = useContext(AuthContext);
+  if (!authContext) {
+    throw new Error("AuthContext is not provided");
+  }
+  const { logout } = authContext;
+  const [user, setUser] = useState<User | null>(null);
   const [opened, setOpened] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [activeTab, setActiveTab] = useState("home");
-  const [editingTask, setEditingTask] = useState(null);
+  const [activeTab, setActiveTab] = useState<string | null>("home");
+  interface Task {
+    id: number;
+    title: string;
+    description: string;
+    priority: string;
+    due_date: string;
+    status?: string;
+  }
+
+  interface User {
+    username: string;
+    user_id: number;
+    email: string;
+    createdAt: string;
+  }
+
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const tasksContext = useContext(TasksContext);
+  if (!tasksContext) {
+    throw new Error("TasksContext is not provided");
+  }
   const {
     fetchTasks,
     tasks,
@@ -45,8 +69,8 @@ const Dashboard = () => {
     marksTaskComplete,
     deleteTask,
     editTask,
-  } = useContext(TasksContext);
-  const [loading, setLoading]= useState(false)
+  } = tasksContext;
+  const [authLoading, setAuthLoading] = useState(false);
 
   const form = useForm({
     mode: "uncontrolled",
@@ -102,36 +126,35 @@ const Dashboard = () => {
     },
   });
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "completed":
-        return "green";
-      case "in-progress":
-        return "blue";
-      case "pending":
-        return "yellow";
-      default:
-        return "gray";
-    }
+  interface StatusColorMap {
+    [key: string]: string;
+  }
+
+  const getStatusColor = (status: string): string => {
+    const statusColorMap: StatusColorMap = {
+      completed: "green",
+      "in-progress": "blue",
+      pending: "yellow",
+    };
+
+    return statusColorMap[status] || "gray";
   };
 
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case "high":
-        return "red";
-      case "High":
-        return "red";
-      case "medium":
-        return "orange";
-      case "Medium":
-        return "orange";
-      case "low":
-        return "gray";
-      case "Low":
-        return "gray";
-      default:
-        return "gray";
-    }
+  interface PriorityColorMap {
+    [key: string]: string;
+  }
+
+  const getPriorityColor = (priority: string): string => {
+    const priorityColorMap: PriorityColorMap = {
+      high: "red",
+      High: "red",
+      medium: "orange",
+      Medium: "orange",
+      low: "gray",
+      Low: "gray",
+    };
+
+    return priorityColorMap[priority] || "gray";
   };
 
   const tasksCompleted = tasks.filter(
@@ -160,35 +183,7 @@ const Dashboard = () => {
     fetchTasks();
   }, []);
 
-  const handleLogout = async () => {
-    setLoading(true)
-    try {
-      const result = await logout();
-      if (result.success) {
-        notifications.show({
-          message: result.message,
-          color: "green",
-        });
-        setTimeout(() => {
-          navigate("/login");
-        }, 1000);
-      } else {
-        notifications.show({
-          message: result.message,
-        });
-      }
-    } catch (error) {
-      console.error("Error occured");
-      notifications.show({
-        message: "Error occured",
-        color: "red",
-      });
-    }
-    finally {
-    setLoading(false)
-  };
-
-  const handleMarkComplete = async (id) => {
+  const handleMarkComplete = async (id: number) => {
     const result = await marksTaskComplete(id);
     if (result.success) {
       notifications.show({
@@ -197,6 +192,20 @@ const Dashboard = () => {
     } else {
       notifications.show({
         message: result.message,
+      });
+    }
+  };
+
+  const handleDeleteTask = async (id: number) => {
+    const result = await deleteTask(id);
+    if (result.success) {
+      notifications.show({
+        message: result.message,
+      });
+    } else {
+      notifications.show({
+        message: result.message,
+        color: "red",
       });
     }
   };
@@ -221,19 +230,6 @@ const Dashboard = () => {
     }
   };
 
-  const handleDeleteTask = async (id: number) => {
-    const result = await deleteTask(id);
-    if (result.success) {
-      notifications.show({
-        message: result.message,
-      });
-    } else {
-      notifications.show({
-        message: result.message,
-        color: "red",
-      });
-    }
-  };
   const handleEditTask = async (values: typeof form_2.values) => {
     const updates = {
       title: values.title,
@@ -241,6 +237,13 @@ const Dashboard = () => {
       priority: values.priority,
       due_date: values.due_date,
     };
+    if (!editingTask) {
+      notifications.show({
+        message: "No task selected for editing",
+        color: "red",
+      });
+      return;
+    }
     const result = await editTask(editingTask.id, updates);
     if (result.success) {
       notifications.show({
@@ -255,7 +258,7 @@ const Dashboard = () => {
     }
   };
 
-  const openEditModal = (task) => {
+  const openEditModal = (task: Task) => {
     setEditingTask(task);
     form_2.setValues({
       title: task.title,
@@ -265,6 +268,35 @@ const Dashboard = () => {
     });
     setEditMode(true);
   };
+
+  const handleLogout = async () => {
+    setAuthLoading(true);
+    try {
+      const result = await logout();
+      if (result.success) {
+        notifications.show({
+          message: result.message,
+          color: "green",
+        });
+        setTimeout(() => {
+          navigate("/login");
+        }, 1000);
+      } else {
+        notifications.show({
+          message: result.message,
+        });
+      }
+    } catch (error) {
+      console.error("Error occured");
+      notifications.show({
+        message: "Error occured",
+        color: "red",
+      });
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -290,7 +322,7 @@ const Dashboard = () => {
               variant="light"
               color="#f90093"
               onClick={handleLogout}
-              loading={loading}
+              loading={authLoading}
             >
               Logout
             </Button>

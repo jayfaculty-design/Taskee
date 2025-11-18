@@ -5,11 +5,13 @@ import Index from "./pages/Index";
 import Login from "./pages/Auth/Login/Login";
 import Register from "./pages/Auth/Register/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Dashboard from "./pages/Dashboard/Dashboard";
+
 import "@mantine/notifications/styles.css";
 import { Notifications } from "@mantine/notifications";
 import { AuthProvider } from "./contexts/AuthContext";
 import { TaskProvider } from "./contexts/TasksContext";
+import Dashboard from "./pages/Dashboard/Dashboard";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
   return (
@@ -22,7 +24,14 @@ function App() {
               <Routes>
                 <Route path="/" index element={<Index />} />
                 <Route element={<ProtectedRoute />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ErrorBoundary>
+                        <Dashboard />
+                      </ErrorBoundary>
+                    }
+                  />
                 </Route>
                 <Route path="/login" index element={<Login />} />
                 <Route path="/register" index element={<Register />} />

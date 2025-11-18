@@ -1,7 +1,6 @@
 import {
   Anchor,
   Button,
-  Center,
   Checkbox,
   Container,
   Group,
@@ -13,15 +12,19 @@ import {
   Title,
 } from "@mantine/core";
 import classes from "./AuthenticationTitle.module.css";
-import { useForm, isNotEmpty } from "@mantine/form";
-import { toast, ToastContainer } from "react-toastify";
-import React, { useContext, useState } from "react";
+import { useForm } from "@mantine/form";
+import { ToastContainer } from "react-toastify";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../../contexts/AuthContext";
 import { useNavigate } from "react-router";
 import { notifications } from "@mantine/notifications";
 
 function Login() {
-  const { login } = useContext(AuthContext);
+  const authContext = useContext(AuthContext);
+  if (!authContext) {
+    throw new Error("No context provided");
+  }
+  const { login } = authContext;
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const form = useForm({
