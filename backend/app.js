@@ -8,7 +8,7 @@ const app = express();
 const PORT = 5000;
 
 const corOptions = {
-  origin: ["https://taskee-manager.vercel.app/", "http://localhost:5173"],
+  origin: ["https://taskee-manager.vercel.app", "http://localhost:5173"],
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
