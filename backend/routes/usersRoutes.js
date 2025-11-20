@@ -168,7 +168,7 @@ router.put("/update-profile", verifyToken, async (req, res) => {
     const emails = await db.query(`SELECT * FROM users WHERE email = $1`, [
       email,
     ]);
-    if (emails.rows.length > 1)
+    if (emails.rows.length > 0)
       return res.status(500).json({
         message: "Email already exists",
       });
