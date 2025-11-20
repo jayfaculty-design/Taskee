@@ -150,6 +150,43 @@ router.get("/me", verifyToken, async (req, res) => {
   }
 });
 
+// edit user profile
+router.put("/update-profile", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+  const { username, email } = req.body;
+
+  try {
+    const result = await db.query(`SELECT * FROM users WHERE id = $1`, [
+      userId,
+    ]);
+    const user = result.rows;
+    if (user.length === 0)
+      return res.status(403).json({
+        message: "Unauthorized user",
+      });
+
+    const updatedProfile = await db.query(
+      `
+          UPDATE users SET
+          username = COALESCE($1, username),
+          email = COALESCE($2, email)
+          WHERE id = $3
+          RETURNING email, username
+    `,
+      [username, email, userId]
+    );
+    res.status(200).json({
+      message: `User profile updated`,
+      user: updatedProfile.rows[0],
+    });
+  } catch (error) {
+    console.error("Error occured updating profile", error);
+    res.status(500).json({
+      message: "Error occured updating profile",
+    });
+  }
+});
+
 // logout
 router.post("/logout", (req, res) => {
   res.status(200).json({

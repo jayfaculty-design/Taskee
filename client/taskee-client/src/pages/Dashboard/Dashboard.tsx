@@ -35,10 +35,11 @@ const Dashboard = () => {
   if (!authContext) {
     throw new Error("AuthContext is not provided");
   }
-  const { logout } = authContext;
+  const { logout, updateUser } = authContext;
   const [user, setUser] = useState<User | null>(null);
   const [opened, setOpened] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [editProfileMode, setEditProfileMode] = useState(false);
   const [activeTab, setActiveTab] = useState<string | null>("home");
   interface Task {
     id: number;
@@ -97,6 +98,33 @@ const Dashboard = () => {
       priority: (value) => (!value ? "Pick a priority" : null),
       due_date: (value) => (!value ? "Please select due date" : null),
     },
+
+    validateInputOnChange: true,
+  });
+
+  const updateProfileForm = useForm({
+    mode: "uncontrolled",
+    initialValues: {
+      username: "",
+      email: "",
+    },
+
+    validate: {
+      username: (value) =>
+        !value
+          ? "Username cannot be empty"
+          : value.length < 5
+          ? "Username should not be less than 5"
+          : null,
+      email: (value) =>
+        /^\S+@\S+$/.test(value)
+          ? null
+          : !value
+          ? "Email cannot be empty"
+          : "Invalid email",
+    },
+
+    validateInputOnChange: true,
   });
 
   const form_2 = useForm({
@@ -124,6 +152,8 @@ const Dashboard = () => {
       priority: (value) => (!value ? "Pick a priority" : null),
       due_date: (value) => (!value ? "Please select due date" : null),
     },
+
+    validateInputOnChange: true,
   });
 
   interface StatusColorMap {
@@ -297,6 +327,20 @@ const Dashboard = () => {
       });
     } finally {
       setAuthLoading(false);
+    }
+  };
+
+  const handleUpdateUser = async (values: typeof updateProfileForm.values) => {
+    const result = await updateUser(values.username, values.email);
+    if (result.success) {
+      notifications.show({
+        message: result.message,
+      });
+    } else {
+      notifications.show({
+        message: result.message,
+        color: "red",
+      });
     }
   };
 
@@ -579,7 +623,11 @@ const Dashboard = () => {
                   </div>
 
                   <Group justify="flex-end" mt="md">
-                    <Button variant="light" color="#549F93">
+                    <Button
+                      onClick={() => setEditProfileMode(true)}
+                      variant="light"
+                      color="#549F93"
+                    >
                       Edit Profile
                     </Button>
                     <Button variant="outline" color="#f90093">
@@ -635,6 +683,46 @@ const Dashboard = () => {
               </Button>
               <Button loading={loading} type="submit" color="#f90093">
                 Upadate Task
+              </Button>
+            </Group>
+          </form>
+        </Stack>
+      </Modal>
+
+      {/* Edit profile modal */}
+      <Modal
+        opened={editProfileMode}
+        onClose={() => setEditProfileMode(false)}
+        title={<Text fw={600}>Edit Profile</Text>}
+        size="lg"
+      >
+        <Stack gap={"md"}>
+          <form
+            action=""
+            onSubmit={updateProfileForm.onSubmit(handleUpdateUser)}
+          >
+            <TextInput
+              label="Username"
+              placeholder="Enter username"
+              {...updateProfileForm.getInputProps("username")}
+            />
+            <TextInput
+              pt={10}
+              label="Email"
+              placeholder="Enter email"
+              {...updateProfileForm.getInputProps("email")}
+            />
+
+            <Group grow mt={20}>
+              <Button
+                variant="light"
+                color="gray"
+                onClick={() => setEditProfileMode(false)}
+              >
+                Cancel
+              </Button>
+              <Button loading={loading} type="submit" color="#f90093">
+                Edit Profile
               </Button>
             </Group>
           </form>

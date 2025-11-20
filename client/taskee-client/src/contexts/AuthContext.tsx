@@ -13,6 +13,10 @@ interface AuthContextType {
     email: string,
     password: string
   ) => Promise<{ success: boolean; message: string }>;
+  updateUser: (
+    username: string,
+    email: string
+  ) => Promise<{ success: boolean; message: string }>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -71,6 +75,30 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
     }
   };
 
+  const updateUser = async (username: string, email: string) => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.put(
+        "https://taskee-k4pn.onrender.com/auth/update-profile",
+        {
+          username,
+          email,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = response.data;
+      return { success: true, message: data.message };
+    } catch (error: any) {
+      const errorMessage =
+        error.reponse?.data?.message || "Error occured, cant update profile";
+      return { success: false, message: errorMessage };
+    }
+  };
+
   const logout = async () => {
     try {
       const response = await axios.post(
@@ -96,6 +124,7 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
         status,
         logout,
         register,
+        updateUser,
       }}
     >
       {children}
