@@ -22,7 +22,10 @@ function App() {
           <TaskProvider>
             <BrowserRouter>
               <Routes>
-                <Route path="/" index element={<Index />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/" index element={<Index />} />
+                </Route>
+
                 <Route element={<ProtectedRoute />}>
                   <Route
                     path="/dashboard"
