@@ -165,6 +165,14 @@ router.put("/update-profile", verifyToken, async (req, res) => {
         message: "Unauthorized user",
       });
 
+    const emails = await db.query(`SELECT * FROM users WHERE email = $1`, [
+      email,
+    ]);
+    if (emails.rows.length > 1)
+      return res.status(500).json({
+        message: "Email already exists",
+      });
+
     const updatedProfile = await db.query(
       `
           UPDATE users SET

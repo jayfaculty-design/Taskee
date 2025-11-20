@@ -336,6 +336,7 @@ const Dashboard = () => {
       notifications.show({
         message: result.message,
       });
+      setEditProfileMode(false);
     } else {
       notifications.show({
         message: result.message,
